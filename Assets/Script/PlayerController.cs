@@ -7,11 +7,17 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using static UnityEditor.Experimental.GraphView.GraphView;
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Settings")]
 
+    PlayerInput playerInput;
+    CharacterController characterController;
+
+
+
+    [Header("Settings")]
 
     [Tooltip("The speed at which the player walks")]
     public float moveSpeed = 4f;
@@ -35,6 +41,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] private float landAnimDuration = 0.1f;
 
+    private bool isJumpPressed = false;
     [SerializeField] private float jumpAnimDuration = 0.4f;
     [SerializeField] private float maxJumpHeight;
     [SerializeField] private float maxJumpTime;
@@ -71,7 +78,14 @@ public class PlayerController : MonoBehaviour
     public Vector2 OnAir { get; }
 
 
+    private void Awake()
+    {
+        playerInput = new PlayerInput();
+        characterController = GetComponent<CharacterController>();
+        playerInput.CharacterControls.Jump.started += onJump;
+        playerInput.CharacterControls.Jump.canceled += onJump;
 
+    }
     void Start()
     {   
         anim = GetComponent<Animator>();
@@ -114,6 +128,21 @@ public class PlayerController : MonoBehaviour
         currentState = state;
     }
 
+    private void OnEnable()
+    {
+        playerInput.CharacterControls.Enable();
+    }
+
+    private void OnDisable()
+    {
+        playerInput.CharacterControls.Disable();
+    }
+
+    void onJump(InputAction.CallbackContext context)
+    {
+        isJumpPressed = context.ReadValueAsButton();
+    }
+        
     private int GetState()
     {
         if (Time.time < lockedTill) return currentState;
@@ -217,7 +246,7 @@ public class PlayerController : MonoBehaviour
     }
     void jumpingProcess()
     {   
-        if (Input.GetKeyDown("space") && isGrounded)
+        if (Input.GetKey("space") && isGrounded)
         {   
             isJumping = true;
             transform.position += transform.TransformDirection(Vector3.up * jumpPower * Time.deltaTime);
