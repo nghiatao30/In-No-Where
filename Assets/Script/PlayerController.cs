@@ -114,7 +114,7 @@ public class PlayerController : MonoBehaviour
 
         if(isGrounded)
         {
-            isJumpPressed = false;  
+            isJumping = false;  
             isFalling = false;
         }
 
