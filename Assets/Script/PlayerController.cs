@@ -42,6 +42,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float landAnimDuration = 0.1f;
 
     private bool isJumpPressed = false;
+    private Vector3 currenJump = new Vector3 (0,0,0);
+    [SerializeField] private float initialJumpVelocity;
     [SerializeField] private float jumpAnimDuration = 0.4f;
     [SerializeField] private float maxJumpHeight;
     [SerializeField] private float maxJumpTime;
@@ -84,7 +86,7 @@ public class PlayerController : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         playerInput.CharacterControls.Jump.started += onJump;
         playerInput.CharacterControls.Jump.canceled += onJump;
-
+        setUpJumpVariable();
     }
     void Start()
     {   
@@ -97,6 +99,8 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+
+        //isGrounded = characterController.isGrounded;
         RaycastHit hit;
         Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up);
         if (Physics.Raycast(ray, out hit, raycastYOffset))
@@ -242,8 +246,21 @@ public class PlayerController : MonoBehaviour
 
     void handleGravity()
     {
-
+        if (isGrounded) {
+            transform.position = new Vector3(transform.position.x, groundedGravity, transform.position.z);
+        }
+        else
+        {
+            transform.position += Vector3.down * gravity * Time.deltaTime;
+        }
     }
+
+    void setUpJumpVariable()
+    {
+        float timeToApex = maxJumpTime / 2;
+        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex,2);
+    }
+
     void jumpingProcess()
     {   
         if (Input.GetKey("space") && isGrounded)
