@@ -18,9 +18,22 @@ public class GroundCheck : MonoBehaviour
                 playerController.IsGrounded = true;
                 Debug.Log("PlayerController is on ground.");
             }
-            else
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Ground"))
+        {
+            // Find the PlayerController component in the scene
+            PlayerController playerController = FindObjectOfType<PlayerController>();
+
+            // Check if PlayerController component is found
+            if (playerController != null)
             {
-                Debug.LogError("PlayerController not found in the scene.");
+                // Set the IsGrounded attribute to true
+                playerController.IsGrounded = false;
+                Debug.Log("PlayerController not on ground.");
             }
         }
     }
