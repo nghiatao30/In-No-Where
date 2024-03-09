@@ -42,7 +42,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float landAnimDuration = 0.1f;
 
     private bool isJumpPressed = false;
-    private Vector3 currenJumpVelocity = new Vector3 (0,0,0);
+    private Vector3 currentJumpVelocity = new Vector3 (0,0,0);
     [SerializeField] private float initialJumpVelocity;
     [SerializeField] private float jumpAnimDuration = 0.4f;
     [SerializeField] private float maxJumpHeight = 4f;
@@ -100,23 +100,37 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
 
-        //isGrounded = characterController.isGrounded;
-        RaycastHit hit;
-        Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up);
-        if (Physics.Raycast(ray, out hit, raycastYOffset))
+        isGrounded = characterController.isGrounded;
+        //RaycastHit hit;
+        //Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up);
+        //if (Physics.Raycast(ray, out hit, raycastYOffset))
+        //{
+        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.yellow);
+        //    Debug.Log("player is on ground");
+        //    isGrounded = true;
+        //    isJumping = false;
+        //    isFalling = false;
+        //}
+        //else
+        //{
+        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.white);
+        //    Debug.Log("not on ground");
+        //    isGrounded=false;
+        //}
+
+        if(isGrounded )
         {
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.yellow);
             Debug.Log("player is on ground");
-            isGrounded = true;
             isJumping = false;
             isFalling = false;
         }
         else
         {
-            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.white);
             Debug.Log("not on ground");
             isGrounded=false;
         }
+
+
         isWalking = false;
         isRunning = false;
 
@@ -124,14 +138,14 @@ public class PlayerController : MonoBehaviour
         //verticalInput = Input.GetAxis("Vertical");
         moveProcess();
         rotatingProcess();
-        jumpingProcess();
+        //jumpingProcess();
 
         var state = GetState();
         if (state == currentState) return;
         anim.CrossFade(state, 0, 0);
         currentState = state;
 
-        //handleGravity();
+        handleGravity();
         handleJump();
 
     }
@@ -251,7 +265,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            transform.position += Vector3.down * gravity * Time.deltaTime;
+            transform.position -= Vector3.down * gravity * Time.deltaTime;
         }
     }
 
@@ -264,9 +278,13 @@ public class PlayerController : MonoBehaviour
 
     void handleJump()
     {
-        if(!isJumping && characterController.isGrounded && isJumpPressed) {
+        if(!isJumping && isGrounded && isJumpPressed) {
             isJumping = true;
-            currenJumpVelocity.y = initialJumpVelocity;
+            currentJumpVelocity.y = initialJumpVelocity;
+            transform.position += currentJumpVelocity * Time.deltaTime;
+        } else if (!isJumpPressed && isJumping && isGrounded)
+        {
+            isJumping = false;
         }
     }
 
