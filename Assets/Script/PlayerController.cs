@@ -42,11 +42,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float landAnimDuration = 0.1f;
 
     private bool isJumpPressed = false;
-    private Vector3 currenJump = new Vector3 (0,0,0);
+    private Vector3 currenJumpVelocity = new Vector3 (0,0,0);
     [SerializeField] private float initialJumpVelocity;
     [SerializeField] private float jumpAnimDuration = 0.4f;
-    [SerializeField] private float maxJumpHeight;
-    [SerializeField] private float maxJumpTime;
+    [SerializeField] private float maxJumpHeight = 4f;
+    [SerializeField] private float maxJumpTime = 0.5f;
     [SerializeField] private float groundedGravity = -.05f;
 
 
@@ -130,6 +130,10 @@ public class PlayerController : MonoBehaviour
         if (state == currentState) return;
         anim.CrossFade(state, 0, 0);
         currentState = state;
+
+        //handleGravity();
+        handleJump();
+
     }
 
     private void OnEnable()
@@ -199,10 +203,6 @@ public class PlayerController : MonoBehaviour
     //private static readonly int Crouch = Animator.StringToHash("Crouch");
 
     #endregion
-
-
-
-
     void moveProcess()
     {
         if (Input.GetKey("w"))
@@ -259,6 +259,15 @@ public class PlayerController : MonoBehaviour
     {
         float timeToApex = maxJumpTime / 2;
         gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex,2);
+        initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
+    }
+
+    void handleJump()
+    {
+        if(!isJumping && characterController.isGrounded && isJumpPressed) {
+            isJumping = true;
+            currenJumpVelocity.y = initialJumpVelocity;
+        }
     }
 
     void jumpingProcess()
