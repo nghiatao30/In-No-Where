@@ -7,14 +7,10 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using static UnityEditor.Experimental.GraphView.GraphView;
-using UnityEngine.InputSystem;
+
 
 public class PlayerController : MonoBehaviour
 {
-
-    PlayerInput playerInput;
-    CharacterController characterController;
-
 
 
     [Header("Settings")]
@@ -25,7 +21,7 @@ public class PlayerController : MonoBehaviour
     public float rotateSpeed = 60f;
 
     [Tooltip("The power at which the player jumps")]
-    public float jumpPower = 8f;
+    public float jumpPower = 1f;
     [Tooltip("The gravity of the evironmetn")]
     [SerializeField] private float gravity = -9.81f;
 
@@ -40,8 +36,8 @@ public class PlayerController : MonoBehaviour
     private float verticalInput;
 
     [SerializeField] private float landAnimDuration = 0.1f;
-
-    private bool isJumpPressed = false;
+     
+    [SerializeField] private bool isJumpPressed = false;
     private Vector3 currentJumpVelocity = new Vector3 (0,0,0);
     [SerializeField] private float initialJumpVelocity;
     [SerializeField] private float jumpAnimDuration = 0.4f;
@@ -76,14 +72,7 @@ public class PlayerController : MonoBehaviour
         set { isGrounded = value; }  // set method
     }
 
-    public Vector2 OnGround { get; }
-    public Vector2 OnAir { get; }
 
-
-    private void Awake()
-    {
-        //setUpJumpVariable();
-    }
     void Start()
     {   
         anim = GetComponent<Animator>();
@@ -111,43 +100,40 @@ public class PlayerController : MonoBehaviour
         //    Debug.Log("not on ground");
         //    isGrounded = false;
         //}
-
-        if(isGrounded)
+        if (isGrounded)
         {
             isJumping = false;  
             isFalling = false;
         }
-
+        
         isWalking = false;
         isRunning = false;
 
         horizontalInput = Input.GetAxis("Horizontal");
         //verticalInput = Input.GetAxis("Vertical");
+        checkJumpressed();
         moveProcess();
         rotatingProcess();
-        jumpingProcess();
-
+        handleGravity();
         var state = GetState();
         if (state == currentState) return;
         anim.CrossFade(state, 0, 0);
         currentState = state;
 
-        //handleGravity();
-        //handleJump();
-        Debug.Log("Position: " + transform.position);
-
-    }
-
-    void onJump(InputAction.CallbackContext context)
-    {
-        isJumpPressed = context.ReadValueAsButton();
-        if (isJumpPressed) { Debug.Log("Jump Pressed"); }
-        else
-        {
-            Debug.Log("Jump not pressed");
-        }
-    }
+        /*heckJumpressed();*/
         
+        //handleJump();
+
+        
+
+    }
+
+
+    //private void FixedUpdate()
+    //{
+    //    jumpingProcess();
+    //}
+
     private int GetState()
     {
         if (Time.time < lockedTill) return currentState;
@@ -226,6 +212,19 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void checkJumpressed()
+    { 
+        if(Input.GetKey(KeyCode.Space)) {
+            isJumpPressed = true;
+        }
+        else
+        {
+            isJumpPressed = false;
+        }
+    }
+
+
+
     void checkMoving()
     {
         if (isGrounded)
@@ -250,7 +249,7 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            transform.position -= transform.TransformDirection(Vector3.down * gravity * Time.deltaTime);
+            transform.position -= transform.TransformDirection(Vector3.up) * gravity * Time.deltaTime;
         }
         
     }
@@ -276,10 +275,10 @@ public class PlayerController : MonoBehaviour
 
     void jumpingProcess()
     {   
-        if (Input.GetKey("space") && isGrounded)
+        if (Input.GetKeyDown("space") && isGrounded)
         {   
             isJumping = true;
-            transform.position += transform.TransformDirection(Vector3.up * jumpPower * Time.deltaTime);
+            rb.AddForce(Vector3.Normalize(Vector3.up) * jumpPower, ForceMode.Impulse); 
         }
     }
 
@@ -288,10 +287,5 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 playerRotate = transform.rotation.eulerAngles;
         transform.rotation = Quaternion.Euler(new Vector3(playerRotate.x, playerRotate.y + horizontalInput * rotateSpeed * Time.deltaTime, playerRotate.z));
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-       
     }
 }

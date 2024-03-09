@@ -16,7 +16,7 @@ public class GroundCheck : MonoBehaviour
             {
                 // Set the IsGrounded attribute to true
                 playerController.IsGrounded = true;
-                Debug.Log("PlayerController is on ground.");
+                Debug.Log("Player is on ground.");
             }
         }
     }
@@ -33,7 +33,7 @@ public class GroundCheck : MonoBehaviour
             {
                 // Set the IsGrounded attribute to true
                 playerController.IsGrounded = false;
-                Debug.Log("PlayerController not on ground.");
+                Debug.Log("Player not on ground.");
             }
         }
     }
