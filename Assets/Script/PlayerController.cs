@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("The power at which the player jumps")]
     public float jumpPower = 8f;
     [Tooltip("The gravity of the evironmetn")]
-    public float gravity = -9.81f;
+    [SerializeField] private float gravity = -9.81f;
 
     [Header("Jump Timing")]
     public float jumpTimeLeniency = 0.1f;
@@ -82,11 +82,7 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        playerInput = new PlayerInput();
-        characterController = GetComponent<CharacterController>();
-        playerInput.CharacterControls.Jump.started += onJump;
-        playerInput.CharacterControls.Jump.canceled += onJump;
-        setUpJumpVariable();
+        //setUpJumpVariable();
     }
     void Start()
     {   
@@ -99,37 +95,22 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-
-        isGrounded = characterController.isGrounded;
-        //RaycastHit hit;
-        //Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up);
-        //if (Physics.Raycast(ray, out hit, raycastYOffset))
-        //{
-        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.yellow);
-        //    Debug.Log("player is on ground");
-        //    isGrounded = true;
-        //    isJumping = false;
-        //    isFalling = false;
-        //}
-        //else
-        //{
-        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.white);
-        //    Debug.Log("not on ground");
-        //    isGrounded=false;
-        //}
-
-        if(isGrounded )
+        RaycastHit hit;
+        Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up);
+        if (Physics.Raycast(ray, out hit, raycastYOffset))
         {
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.yellow);
             Debug.Log("player is on ground");
+            isGrounded = true;
             isJumping = false;
             isFalling = false;
         }
         else
         {
+            Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.white);
             Debug.Log("not on ground");
-            isGrounded=false;
+            isGrounded = false;
         }
-
 
         isWalking = false;
         isRunning = false;
@@ -138,31 +119,27 @@ public class PlayerController : MonoBehaviour
         //verticalInput = Input.GetAxis("Vertical");
         moveProcess();
         rotatingProcess();
-        //jumpingProcess();
+        jumpingProcess();
 
         var state = GetState();
         if (state == currentState) return;
         anim.CrossFade(state, 0, 0);
         currentState = state;
 
-        handleGravity();
-        handleJump();
+        //handleGravity();
+        //handleJump();
+        Debug.Log("Position: " + transform.position);
 
-    }
-
-    private void OnEnable()
-    {
-        playerInput.CharacterControls.Enable();
-    }
-
-    private void OnDisable()
-    {
-        playerInput.CharacterControls.Disable();
     }
 
     void onJump(InputAction.CallbackContext context)
     {
         isJumpPressed = context.ReadValueAsButton();
+        if (isJumpPressed) { Debug.Log("Jump Pressed"); }
+        else
+        {
+            Debug.Log("Jump not pressed");
+        }
     }
         
     private int GetState()
@@ -201,6 +178,8 @@ public class PlayerController : MonoBehaviour
             return s;
         }
         return currentState;
+
+
     }
 
     #region Cached Properties
@@ -265,8 +244,9 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            transform.position -= Vector3.down * gravity * Time.deltaTime;
+            transform.position -= transform.TransformDirection(Vector3.down * gravity * Time.deltaTime);
         }
+        
     }
 
     void setUpJumpVariable()
@@ -295,8 +275,6 @@ public class PlayerController : MonoBehaviour
             isJumping = true;
             transform.position += transform.TransformDirection(Vector3.up * jumpPower * Time.deltaTime);
         }
-        
-
     }
 
 
