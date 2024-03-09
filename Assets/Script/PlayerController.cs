@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour
     public float rotateSpeed = 60f;
 
     [Tooltip("The power at which the player jumps")]
-    public float jumpPower = 1f;
+    public float jumpPower = 8f;
     [Tooltip("The gravity of the evironmetn")]
     [SerializeField] private float gravity = -9.81f;
 
@@ -38,11 +38,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float landAnimDuration = 0.1f;
      
     [SerializeField] private bool isJumpPressed = false;
-    private Vector3 currentJumpVelocity = new Vector3 (0,0,0);
-    [SerializeField] private float initialJumpVelocity;
+    [SerializeField] private Vector3 currentJumpVelocity = new Vector3 (0,0,0);
+    [SerializeField] private float initialJumpVelocity = 2f;
     [SerializeField] private float jumpAnimDuration = 0.4f;
-    [SerializeField] private float maxJumpHeight = 4f;
-    [SerializeField] private float maxJumpTime = 0.5f;
+    [SerializeField] private float maxJumpHeight = 1f;
+    [SerializeField] private float maxJumpTime = 2f;
     [SerializeField] private float groundedGravity = -.05f;
 
 
@@ -60,7 +60,7 @@ public class PlayerController : MonoBehaviour
 
     [SerializeField] bool isRunning;
     [SerializeField] bool isWalking;
-    [SerializeField] bool isGrounded;
+    [SerializeField] bool isGrounded = false;
     [SerializeField] bool isJumping;
     [SerializeField] bool isFalling;
     [SerializeField] bool isLanding;
@@ -73,6 +73,10 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    private void Awake()
+    {
+        setUpJumpVariable();
+    }
     void Start()
     {   
         anim = GetComponent<Animator>();
@@ -100,12 +104,17 @@ public class PlayerController : MonoBehaviour
         //    Debug.Log("not on ground");
         //    isGrounded = false;
         //}
+        if (transform.position.y < 0)
+        {
+            transform.position = new Vector3(transform.position.x, 0, transform.position.z);
+        }
+
         if (isGrounded)
         {
-            isJumping = false;  
+            isJumping = false;
             isFalling = false;
         }
-        
+
         isWalking = false;
         isRunning = false;
 
@@ -114,7 +123,9 @@ public class PlayerController : MonoBehaviour
         checkJumpressed();
         moveProcess();
         rotatingProcess();
-        handleGravity();
+        //handleGravity();
+        handleJump();
+
         var state = GetState();
         if (state == currentState) return;
         anim.CrossFade(state, 0, 0);
@@ -122,7 +133,6 @@ public class PlayerController : MonoBehaviour
 
         /*heckJumpressed();*/
         
-        //handleJump();
 
         
 
@@ -142,7 +152,6 @@ public class PlayerController : MonoBehaviour
         //if (_attacked) return LockState(Attack, _attackAnimTime);
         //if (_player.Crouching) return Crouch;
         //if (isLanding) return LockState(Land, landAnimDuration);
-        if (isJumping) return LockState(Jump,jumpAnimDuration);
 
         //if (isGrounded) return OnGround.x == 0 ? Idle : Walk;
         //else return OnAir.y > 0 ? Jump : Fall;
@@ -214,10 +223,10 @@ public class PlayerController : MonoBehaviour
 
     void checkJumpressed()
     { 
-        if(Input.GetKey(KeyCode.Space)) {
+        if(Input.GetKeyDown(KeyCode.Space)) {
             isJumpPressed = true;
         }
-        else
+        else if(Input.GetKeyUp(KeyCode.Space))
         {
             isJumpPressed = false;
         }
@@ -248,8 +257,8 @@ public class PlayerController : MonoBehaviour
             transform.position = new Vector3(transform.position.x, groundedGravity, transform.position.z);
         }
         else
-        {
-            transform.position -= transform.TransformDirection(Vector3.up) * gravity * Time.deltaTime;
+        {   
+            transform.position += Vector3.Normalize(Vector3.up) * gravity * Time.deltaTime;
         }
         
     }
@@ -257,20 +266,22 @@ public class PlayerController : MonoBehaviour
     void setUpJumpVariable()
     {
         float timeToApex = maxJumpTime / 2;
-        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex,2);
+        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
         initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
     }
 
     void handleJump()
-    {
-        if(!isJumping && isGrounded && isJumpPressed) {
+    {   
+        if(isGrounded && Input.GetKeyDown("space")) {
             isJumping = true;
-            currentJumpVelocity.y = initialJumpVelocity;
-            transform.position += currentJumpVelocity * Time.deltaTime;
-        } else if (!isJumpPressed && isJumping && isGrounded)
-        {
-            isJumping = false;
+            //currentJumpVelocity.y = initialJumpVelocity;
+            //transform.position += currentJumpVelocity * Time.deltaTime; 
+            transform.position += Vector3.up * jumpPower * Time.deltaTime;
         }
+        //else if (!isJumpPressed && isJumping && isGrounded)
+        //{ 
+        //    isJumping = false;
+        //}
     }
 
     void jumpingProcess()

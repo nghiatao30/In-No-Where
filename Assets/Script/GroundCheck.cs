@@ -6,7 +6,7 @@ public class GroundCheck : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ground"))
+        if (other.gameObject.CompareTag("Ground"))
         {
             // Find the PlayerController component in the scene
             PlayerController playerController = FindObjectOfType<PlayerController>();
@@ -21,9 +21,10 @@ public class GroundCheck : MonoBehaviour
         }
     }
 
+        
     private void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Ground"))
+        if (other.gameObject.CompareTag("Ground"))
         {
             // Find the PlayerController component in the scene
             PlayerController playerController = FindObjectOfType<PlayerController>();
