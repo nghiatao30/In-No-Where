@@ -163,13 +163,14 @@ public class PlayerController : MonoBehaviour
         //if (isGrounded) return OnGround.x == 0 ? Idle : Walk;
         //else return OnAir.y > 0 ? Jump : Fall;
 
-        if (isJumping)
+
+        if (isGrounded)
         {
-            toggleJump = 1;
-            return Jump;
-        }
-        else if (isGrounded)
-        {
+            if (isJumping)
+            {
+                toggleJump = 1;
+                return Jump;
+            }
             if (isWalking) return walkForward;
             if (isRunning) return runForward;
             return Idle;
