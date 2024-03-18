@@ -26,7 +26,7 @@ public class CameraController : MonoBehaviour
     /// void (no return)
     /// </summary>
     void Start()
-    {
+    {   
         SetUpCamera();
     }
 

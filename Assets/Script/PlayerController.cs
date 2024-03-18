@@ -18,7 +18,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("The speed at which the player walks")]
     public float moveSpeed = 4f;
     [Tooltip("The speed at which the player rotates")]
-    public float rotateSpeed = 60f;
+    public float rotateSpeed = 100f;
 
     [Tooltip("The power at which the player jumps")]
     public float jumpPower = 8f;
