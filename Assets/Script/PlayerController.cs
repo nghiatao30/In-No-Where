@@ -28,7 +28,7 @@ public class PlayerController : MonoBehaviour
     [Header("Jump Timing")]
     public float jumpTimeLeniency = 0.1f;
     float timeToStopLeninent;
-
+    
 
     [SerializeField]
     private float horizontalInput;
@@ -36,27 +36,28 @@ public class PlayerController : MonoBehaviour
     private float verticalInput;
 
     [SerializeField] private float landAnimDuration = 0.1f;
-     
+
+    [SerializeField] private float toggleJump = 0;
     [SerializeField] private bool isJumpPressed = false;
-    [SerializeField] private Vector3 currentJumpVelocity = new Vector3 (0,0,0);
+    [SerializeField] private float velocityY;
     [SerializeField] private float initialJumpVelocity = 2f;
     [SerializeField] private float jumpAnimDuration = 0.4f;
-    [SerializeField] private float maxJumpHeight = 1f;
+    [SerializeField] private float maxJumpHeight = 1.8f;
     [SerializeField] private float maxJumpTime = 2f;
     [SerializeField] private float groundedGravity = -.05f;
 
-
-    [SerializeField] private float attackAnimTime = 0.2f;
     [SerializeField] private float fallingOffset = 0.5f;
     private float fallingTime;
 
     private Animator anim;
     private Rigidbody rb;
 
+
     public LayerMask groundMask;
     BoxCollider boxCollider;
     float maxGroundDist;
     [SerializeField]  float raycastYOffset = 2f;
+    [SerializeField] private Transform groundCheck;
 
     [SerializeField] bool isRunning;
     [SerializeField] bool isWalking;
@@ -73,17 +74,14 @@ public class PlayerController : MonoBehaviour
     }
 
 
-    private void Awake()
-    {
-        setUpJumpVariable();
-    }
+    //private void Awake()
+    //{
+    //    setUpJumpVariable();
+    //}
     void Start()
     {   
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
-        groundMask = 8;
-        boxCollider = GetComponent<BoxCollider>();
-        maxGroundDist = boxCollider.bounds.size.y + 0.01f;
     }
 
     void Update()
@@ -104,16 +102,24 @@ public class PlayerController : MonoBehaviour
         //    Debug.Log("not on ground");
         //    isGrounded = false;
         //}
-        if (transform.position.y < 0)
-        {
-            transform.position = new Vector3(transform.position.x, 0, transform.position.z);
-        }
 
+        isGrounded = IsGround();
+        Debug.Log(isGrounded);
+
+        
+        
         if (isGrounded)
         {
+            gravity = 0f;
+            velocityY = 0f;
             isJumping = false;
             isFalling = false;
         }
+        else
+        {
+            gravity = Physics.gravity.y;
+        }
+
 
         isWalking = false;
         isRunning = false;
@@ -123,8 +129,9 @@ public class PlayerController : MonoBehaviour
         checkJumpressed();
         moveProcess();
         rotatingProcess();
-        //handleGravity();
         handleJump();
+
+
 
         var state = GetState();
         if (state == currentState) return;
@@ -156,14 +163,17 @@ public class PlayerController : MonoBehaviour
         //if (isGrounded) return OnGround.x == 0 ? Idle : Walk;
         //else return OnAir.y > 0 ? Jump : Fall;
 
-        if (isGrounded)
+        if (isJumping)
         {
-            //if (rb.velocity.x > 0 || rb.velocity.z > 0) return walkForward;
+            toggleJump = 1;
+            return Jump;
+        }
+        else if (isGrounded)
+        {
             if (isWalking) return walkForward;
             if (isRunning) return runForward;
             return Idle;
         }
-        else if (isJumping) return Jump;
         else
         {
             if (!isFalling)
@@ -173,7 +183,7 @@ public class PlayerController : MonoBehaviour
             }
             else return Time.time > fallingTime ? Fall : currentState;
         }
-        int LockState(int s, float t)
+            int LockState(int s, float t)
         {
             lockedTill = Time.time + t;
             return s;
@@ -251,18 +261,6 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void handleGravity()
-    {
-        if (isGrounded) {
-            transform.position = new Vector3(transform.position.x, groundedGravity, transform.position.z);
-        }
-        else
-        {   
-            transform.position += Vector3.Normalize(Vector3.up) * gravity * Time.deltaTime;
-        }
-        
-    }
-
     void setUpJumpVariable()
     {
         float timeToApex = maxJumpTime / 2;
@@ -271,32 +269,30 @@ public class PlayerController : MonoBehaviour
     }
 
     void handleJump()
-    {   
-        if(isGrounded && Input.GetKeyDown("space")) {
-            isJumping = true;
-            //currentJumpVelocity.y = initialJumpVelocity;
-            //transform.position += currentJumpVelocity * Time.deltaTime; 
-            transform.position += Vector3.up * jumpPower * Time.deltaTime;
-        }
-        //else if (!isJumpPressed && isJumping && isGrounded)
-        //{ 
-        //    isJumping = false;
-        //}
-    }
-
-    void jumpingProcess()
-    {   
-        if (Input.GetKeyDown("space") && isGrounded)
+    {
+        toggleJump = 0;
+        if (isGrounded && Input.GetKeyDown("space") && toggleJump == 0)
         {   
             isJumping = true;
-            rb.AddForce(Vector3.Normalize(Vector3.up) * jumpPower, ForceMode.Impulse); 
+            isFalling = false;
+            isWalking = false;
+            isRunning = false;
+            //currentJumpVelocity.y = initialJumpVelocity;
+            //transform.position += currentJumpVelocity * Time.deltaTime; 
+            velocityY = Mathf.Sqrt(maxJumpHeight * -2 * Physics.gravity.y);
         }
+        velocityY += gravity * Time.deltaTime;
+        transform.Translate(new Vector3(0, velocityY, 0) * Time.deltaTime);
     }
-
 
     void rotatingProcess()
     {
         Vector3 playerRotate = transform.rotation.eulerAngles;
         transform.rotation = Quaternion.Euler(new Vector3(playerRotate.x, playerRotate.y + horizontalInput * rotateSpeed * Time.deltaTime, playerRotate.z));
+    }
+
+    bool IsGround()
+    {
+        return Physics.CheckSphere(groundCheck.position, .1f, groundMask);
     }
 }

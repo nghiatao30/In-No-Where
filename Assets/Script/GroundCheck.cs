@@ -6,8 +6,8 @@ public class GroundCheck : MonoBehaviour
 {
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.CompareTag("Ground"))
-        {
+        if (other.CompareTag("Ground"))
+        {   
             // Find the PlayerController component in the scene
             PlayerController playerController = FindObjectOfType<PlayerController>();
 
@@ -16,7 +16,6 @@ public class GroundCheck : MonoBehaviour
             {
                 // Set the IsGrounded attribute to true
                 playerController.IsGrounded = true;
-                Debug.Log("Player is on ground.");
             }
         }
     }
@@ -24,7 +23,7 @@ public class GroundCheck : MonoBehaviour
         
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.CompareTag("Ground"))
+        if (other.CompareTag("Ground"))
         {
             // Find the PlayerController component in the scene
             PlayerController playerController = FindObjectOfType<PlayerController>();
@@ -34,7 +33,6 @@ public class GroundCheck : MonoBehaviour
             {
                 // Set the IsGrounded attribute to true
                 playerController.IsGrounded = false;
-                Debug.Log("Player not on ground.");
             }
         }
     }
