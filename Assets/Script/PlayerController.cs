@@ -7,16 +7,28 @@ using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.TextCore.Text;
 using static UnityEditor.Experimental.GraphView.GraphView;
-
+using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour
 {
+    PlayerInput playerInput;
+    CharacterController characterController;
+
+    Vector2 currentMovementInput;
+    Vector3 currentMovement;
+    Vector3 currentRunMovement;
+    bool isMovementPressed;
+    bool isRunPressed;
+
+    
 
 
     [Header("Settings")]
 
     [Tooltip("The speed at which the player walks")]
     public float moveSpeed = 4f;
+    [Tooltip("The speed at which the player runs")]
+    public float runSpeed = 6f;
     [Tooltip("The speed at which the player rotates")]
     public float rotateSpeed = 100f;
 
@@ -50,22 +62,17 @@ public class PlayerController : MonoBehaviour
     private float fallingTime;
 
     private Animator anim;
+    int isRunningHash;
+    int isWalkingHash;
+
+
+
+
     private Rigidbody rb;
 
 
     public LayerMask groundMask;
-    BoxCollider boxCollider;
-    float maxGroundDist;
-    [SerializeField]  float raycastYOffset = 2f;
-    [SerializeField] private Transform groundCheck;
-
-    [SerializeField] bool isRunning;
-    [SerializeField] bool isWalking;
     [SerializeField] bool isGrounded = false;
-    [SerializeField] bool isJumping;
-    [SerializeField] bool isFalling;
-    [SerializeField] bool isLanding;
-    [SerializeField] float lockedTill;
 
     public bool IsGrounded   // property
     {
@@ -78,121 +85,111 @@ public class PlayerController : MonoBehaviour
     //{
     //    setUpJumpVariable();
     //}
-    void Start()
+    void Awake()
     {   
+        playerInput = new PlayerInput();
+        characterController = GetComponent<CharacterController>();
+
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
+
+        isWalkingHash = Animator.StringToHash("isWalking");
+        isRunningHash = Animator.StringToHash("isRunning");
+
+
+        playerInput.CharacterControls.Move.started += OnMoveMentInput;
+        playerInput.CharacterControls.Move.canceled += OnMoveMentInput;
+        playerInput.CharacterControls.Move.performed += OnMoveMentInput;
+        playerInput.CharacterControls.Run.started += OnRun;
+        playerInput.CharacterControls.Run.canceled += OnRun;
+
     }
 
-    void Update()
+    void OnMoveMentInput(InputAction.CallbackContext context)
     {
-        //RaycastHit hit;
-        //Ray ray = new Ray(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up);
-        //if (Physics.Raycast(ray, out hit, raycastYOffset))
-        //{
-        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.yellow);
-        //    Debug.Log("player is on ground");
-        //    isGrounded = true;
-        //    isJumping = false;
-        //    isFalling = false;
-        //}
-        //else
-        //{
-        //    Debug.DrawRay(transform.position, transform.TransformDirection(Vector3.down) * raycastYOffset, Color.white);
-        //    Debug.Log("not on ground");
-        //    isGrounded = false;
-        //}
+        currentMovementInput = context.ReadValue<Vector2>();
+        currentMovement.x = currentMovementInput.x * moveSpeed;
+        currentMovement.z = currentMovementInput.y * moveSpeed;
+        currentRunMovement.x = currentMovementInput.x * runSpeed;
+        currentRunMovement.z = currentMovementInput.y * runSpeed;
+        isMovementPressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
+    }
 
-        isGrounded = IsGround();
-        Debug.Log(isGrounded);
+    void OnRun(InputAction.CallbackContext context)
+    {
+        isRunPressed = context.ReadValueAsButton();
+    }
 
-        
-        
-        if (isGrounded)
+    void handleAnimation()
+    {
+        bool isWalking = anim.GetBool(isWalkingHash);
+        bool isRunning = anim.GetBool(isRunningHash);
+
+        if(isMovementPressed && !isWalking) {
+            anim.SetBool(isWalkingHash, true);
+        }
+
+        if (!isMovementPressed && isWalking)
         {
-            gravity = 0f;
-            velocityY = 0f;
-            isJumping = false;
-            isFalling = false;
+            anim.SetBool(isWalkingHash, false);
+        }
+
+        if ((isMovementPressed && isRunPressed) && !isRunning)
+        {
+            anim.SetBool(isRunningHash, true);
+
+        }
+        else if ((!isMovementPressed && !isRunPressed) && isRunning)
+        {
+            anim.SetBool(isRunningHash, false);
+        }
+    }
+
+    void handleGravity()
+    {
+        if(characterController.isGrounded)
+        {
+            currentMovement.y = groundedGravity;
+            currentRunMovement.y = groundedGravity;
         }
         else
         {
-            gravity = Physics.gravity.y;
+            currentMovement.y = gravity;
+            currentRunMovement.y = gravity;
         }
+    }
+    void Update()
+    {
+        handleAnimation();
 
+        if (isRunPressed)
+        {
+            characterController.Move(currentRunMovement * Time.deltaTime);
+        }
+        else
+        {
+            characterController.Move(currentMovement * Time.deltaTime);
 
-        isWalking = false;
-        isRunning = false;
-
-        horizontalInput = Input.GetAxis("Horizontal");
-        //verticalInput = Input.GetAxis("Vertical");
-        checkJumpressed();
-        moveProcess();
-        rotatingProcess();
-        handleJump();
-
-
-
-        var state = GetState();
-        if (state == currentState) return;
-        anim.CrossFade(state, 0, 0);
-        currentState = state;
-
-        /*heckJumpressed();*/
-        
-
-        
+        }
 
     }
 
+    void OnEnable()
+    {
+        playerInput.CharacterControls.Enable();
+    }
+
+    void OnDisable()
+    {
+        playerInput.CharacterControls.Disable();
+    }
 
     //private void FixedUpdate()
     //{
     //    jumpingProcess();
     //}
 
-    private int GetState()
-    {
-        if (Time.time < lockedTill) return currentState;
 
-        // Priorities
-        //if (_attacked) return LockState(Attack, _attackAnimTime);
-        //if (_player.Crouching) return Crouch;
-        //if (isLanding) return LockState(Land, landAnimDuration);
-
-        //if (isGrounded) return OnGround.x == 0 ? Idle : Walk;
-        //else return OnAir.y > 0 ? Jump : Fall;
-
-
-        if (isGrounded)
-        {
-            if (isJumping)
-            {
-                toggleJump = 1;
-                return Jump;
-            }
-            if (isWalking) return walkForward;
-            if (isRunning) return runForward;
-            return Idle;
-        }
-        else
-        {
-            if (!isFalling)
-            {
-                fallingTime = Time.time + fallingOffset;
-                isFalling = true;
-            }
-            else return Time.time > fallingTime ? Fall : currentState;
-        }
-            int LockState(int s, float t)
-        {
-            lockedTill = Time.time + t;
-            return s;
-        }
-        return currentState;
-
-
-    }
 
     #region Cached Properties
 
@@ -208,92 +205,4 @@ public class PlayerController : MonoBehaviour
     //private static readonly int Crouch = Animator.StringToHash("Crouch");
 
     #endregion
-    void moveProcess()
-    {
-        if (Input.GetKey("w"))
-            {
-            transform.position += transform.TransformDirection(Vector3.forward * moveSpeed * Time.deltaTime);
-            checkMoving();
-        }
-        if (Input.GetKey("a"))
-        {
-            transform.position += transform.TransformDirection(Vector3.left * moveSpeed * Time.deltaTime);
-            checkMoving();
-        }
-        if (Input.GetKey("d"))
-        {
-            transform.position += transform.TransformDirection(Vector3.right * moveSpeed * Time.deltaTime);
-            checkMoving();
-        }
-        if (Input.GetKey("s"))
-        {
-            transform.position += transform.TransformDirection(Vector3.back * moveSpeed * Time.deltaTime);
-            checkMoving();
-        }
-    }
-
-    void checkJumpressed()
-    { 
-        if(Input.GetKeyDown(KeyCode.Space)) {
-            isJumpPressed = true;
-        }
-        else if(Input.GetKeyUp(KeyCode.Space))
-        {
-            isJumpPressed = false;
-        }
-    }
-
-
-
-    void checkMoving()
-    {
-        if (isGrounded)
-        {
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                isRunning = true;
-                moveSpeed = 6.5f;
-            }
-            else
-            {
-                isWalking = true;
-                moveSpeed = 4f;
-            }
-        }
-    }
-
-    void setUpJumpVariable()
-    {
-        float timeToApex = maxJumpTime / 2;
-        gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
-        initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
-    }
-
-    void handleJump()
-    {
-        toggleJump = 0;
-        if (isGrounded && Input.GetKeyDown("space") && toggleJump == 0)
-        {   
-            isJumping = true;
-            isFalling = false;
-            isWalking = false;
-            isRunning = false;
-            //currentJumpVelocity.y = initialJumpVelocity;
-            //transform.position += currentJumpVelocity * Time.deltaTime; 
-            velocityY = Mathf.Sqrt(maxJumpHeight * -2 * Physics.gravity.y);
-        }
-        velocityY += gravity * Time.deltaTime;
-        transform.Translate(new Vector3(0, velocityY, 0) * Time.deltaTime);
-    }
-
-    void rotatingProcess()
-    {
-        Vector3 playerRotate = transform.rotation.eulerAngles;
-        transform.rotation = Quaternion.Euler(new Vector3(playerRotate.x, playerRotate.y + horizontalInput * rotateSpeed * Time.deltaTime, playerRotate.z));
-    }
-
-    bool IsGround()
-    {
-        return Physics.CheckSphere(groundCheck.position, .1f, groundMask);
-    }
 }

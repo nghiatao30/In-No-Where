@@ -45,12 +45,12 @@ public class CameraController : MonoBehaviour
     void Update()
     {
         // Wait so many frames to avoid startup camera movement bug
-        if (framesWaited <= waitForFrames)
-        {
-            framesWaited += 1;
-            return;
-        }
-        ProcessRotation();
+        //if (framesWaited <= waitForFrames)
+        //{
+        //    framesWaited += 1;
+        //    return;
+        //}
+        //ProcessRotation();
     }
 
     /// <summary>
@@ -87,20 +87,20 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void ProcessRotation()
     {
-        float verticalLookInput = Input.GetAxis("Vertical");
-        Vector3 cameraRotation = controledCamera.transform.rotation.eulerAngles;
-        float newXRotation = cameraRotation.x + verticalLookInput * rotationSpeed * Time.deltaTime;
-        // clamp the rotation 360 - 270 is up 0 - 90 is down
-        // Because of the way eular angles work with Unity's rotations we have to act differently when clamping the rotation
-        if (newXRotation < 270 && newXRotation >= 180)
-        {
-            newXRotation = 270;
-        }
-        else if (newXRotation > 45 && newXRotation < 180)
-        {
-            newXRotation = 45;
-        }
-        controledCamera.transform.rotation = Quaternion.Euler(new Vector3(newXRotation, cameraRotation.y, cameraRotation.z));
+        //float verticalLookInput = Input.GetAxis("Vertical");
+        //Vector3 cameraRotation = controledCamera.transform.rotation.eulerAngles;
+        //float newXRotation = cameraRotation.x + verticalLookInput * rotationSpeed * Time.deltaTime;
+        //// clamp the rotation 360 - 270 is up 0 - 90 is down
+        //// Because of the way eular angles work with Unity's rotations we have to act differently when clamping the rotation
+        //if (newXRotation < 270 && newXRotation >= 180)
+        //{
+        //    newXRotation = 270;
+        //}
+        //else if (newXRotation > 45 && newXRotation < 180)
+        //{
+        //    newXRotation = 45;
+        //}
+        //controledCamera.transform.rotation = Quaternion.Euler(new Vector3(newXRotation, cameraRotation.y, cameraRotation.z));
     }
 }
 
