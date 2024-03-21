@@ -66,7 +66,9 @@ public class PlayerController : MonoBehaviour
     int isWalkingHash;
     int isJumpingHash;
     bool isJumpAnimating;
-
+    int jumpCount = 0;
+    Dictionary<int, float> initialJumpVelocities = new Dictionary<int, float>();
+    Dictionary<int, float> jumpGravities = new Dictionary<int, float>();
 
 
 
@@ -115,7 +117,19 @@ public class PlayerController : MonoBehaviour
     {
         float timeToApex = maxJumpTime / 2;
         gravity = (-2 * maxJumpHeight) / Mathf.Pow(timeToApex, 2);
-        initialJumpVelocity = (2 * maxJumpHeight) / timeToApex; 
+        initialJumpVelocity = (2 * maxJumpHeight) / timeToApex;
+        float secondJumpGravity = (-2 * (maxJumpHeight + 2)) / Mathf.Pow(timeToApex * 1.25f, 2);
+        float secondJumpVelocity = (2 * (maxJumpHeight + 2)) / (timeToApex * 1.25f);
+        float thirdJumpGravity = (-2 * (maxJumpHeight + 4)) / Mathf.Pow(timeToApex * 1.5f, 2);
+        float thirdJumpVelocity = (2 * (maxJumpHeight + 4)) / (timeToApex * 1.5f);
+
+        initialJumpVelocities.Add(1, initialJumpVelocity);
+        initialJumpVelocities.Add(2, secondJumpVelocity);
+        initialJumpVelocities.Add(3, thirdJumpVelocity);
+
+        jumpGravities.Add(1, gravity);
+        jumpGravities.Add(2, secondJumpGravity);
+        jumpGravities.Add(3, thirdJumpGravity);
     }
 
     void handleJump()
@@ -125,6 +139,7 @@ public class PlayerController : MonoBehaviour
             anim.SetBool("isJumped", true);
             isJumpAnimating = true;
             isJumping = true;
+            jumpCount += 1;
             currentMovement.y = initialJumpVelocity * .5f;
             currentRunMovement.y = initialJumpVelocity * .5f;
 
