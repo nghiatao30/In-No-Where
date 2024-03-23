@@ -29,8 +29,8 @@ public class PlayerController : MonoBehaviour
     public float moveSpeed = 4f;
     [Tooltip("The speed at which the player runs")]
     public float runSpeed = 6f;
-    [Tooltip("The speed at which the player rotates")]
-    public float rotateSpeed = 100f;
+    [Tooltip("The frame rate at which the player rotates")]
+    public float rotationPerFrame = 15f;
 
     [Tooltip("The power at which the player jumps")]
     public float jumpPower = 8f;
@@ -111,6 +111,25 @@ public class PlayerController : MonoBehaviour
         playerInput.CharacterControls.Jump.canceled += OnJump;
 
         SetUpJumpVar();
+
+    }
+
+    void handleRotation()
+    {
+        Vector3 positionToLookAt;
+
+        positionToLookAt.x = currentMovement.x;
+        positionToLookAt.y = 0.0f;
+        positionToLookAt.z = currentMovement.z;
+
+        Quaternion currentRotation = transform.rotation;
+
+        if(isMovementPressed)
+        {
+            Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
+            transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+        }
+
 
     }
     void SetUpJumpVar()
@@ -234,8 +253,9 @@ public class PlayerController : MonoBehaviour
 
     
     void Update()
-    {
+    {   
         handleAnimation();
+        handleRotation();
         handleGravity();
         handleJump();
 
