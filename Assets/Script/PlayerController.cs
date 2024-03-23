@@ -85,6 +85,8 @@ public class PlayerController : MonoBehaviour
     }
 
 
+
+
     //private void Awake()
     //{
     //    setUpJumpVariable();
@@ -268,6 +270,8 @@ public class PlayerController : MonoBehaviour
             characterController.Move(currentMovement * Time.deltaTime);
 
         }
+
+        
 
     }
 

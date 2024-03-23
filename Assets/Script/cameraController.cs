@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
+using UnityEngine.InputSystem;
+
 
 /// <summary>
 /// This class uses processed input from the input manager to control the vertical rotation of the camera
@@ -15,6 +18,12 @@ public class CameraController : MonoBehaviour
     [Tooltip("Whether or not to invert the look direction")]
     public bool invert = true;
 
+    CinemachineFreeLook cinemachineFreeLook;
+
+    [SerializeField] private float mouseX;
+    [SerializeField] private float mouseY;
+    
+
     // The input manager to read input from
 
     /// <summary>
@@ -28,6 +37,7 @@ public class CameraController : MonoBehaviour
     void Start()
     {   
         SetUpCamera();
+        cinemachineFreeLook = GetComponent<CinemachineFreeLook>();
     }
 
     // Wait this many frames before starting to process the camera rotation
@@ -51,6 +61,14 @@ public class CameraController : MonoBehaviour
         //    return;
         //}
         //ProcessRotation();
+        mouseX = Mouse.current.delta.x.ReadValue();
+        mouseY = Mouse.current.delta.y.ReadValue();
+        
+
+
+
+
+
     }
 
     /// <summary>
@@ -101,6 +119,10 @@ public class CameraController : MonoBehaviour
         //    newXRotation = 45;
         //}
         //controledCamera.transform.rotation = Quaternion.Euler(new Vector3(newXRotation, cameraRotation.y, cameraRotation.z));
+
+
+
+
     }
 }
 
