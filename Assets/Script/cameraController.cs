@@ -20,8 +20,7 @@ public class CameraController : MonoBehaviour
 
     CinemachineFreeLook cinemachineFreeLook;
 
-    [SerializeField] private float mouseX;
-    [SerializeField] private float mouseY;
+
     
 
     // The input manager to read input from
@@ -61,8 +60,7 @@ public class CameraController : MonoBehaviour
         //    return;
         //}
         //ProcessRotation();
-        mouseX = Mouse.current.delta.x.ReadValue();
-        mouseY = Mouse.current.delta.y.ReadValue();
+
         
 
 
