@@ -13,6 +13,8 @@ public class PlayerController : MonoBehaviour
 {
     PlayerInput playerInput;
     CharacterController characterController;
+    GameObject virCam;
+    [SerializeField] private Transform cameraDirection;
 
     Vector2 currentMovementInput;
     Vector3 currentMovement;
@@ -28,7 +30,7 @@ public class PlayerController : MonoBehaviour
     [Tooltip("The speed at which the player walks")]
     public float moveSpeed = 4f;
     [Tooltip("The speed at which the player runs")]
-    public float runSpeed = 6f;
+    public float runSpeed = 8f;
     [Tooltip("The frame rate at which the player rotates")]
     public float rotationPerFrame = 15f;
 
@@ -95,6 +97,8 @@ public class PlayerController : MonoBehaviour
     {   
         playerInput = new PlayerInput();
         characterController = GetComponent<CharacterController>();
+        cameraDirection =  GameObject.Find("VirtualCamera1").transform;
+
 
         anim = GetComponent<Animator>();
         rb = GetComponent<Rigidbody>();
@@ -126,12 +130,27 @@ public class PlayerController : MonoBehaviour
 
         Quaternion currentRotation = transform.rotation;
 
+        positionToLookAt = newDirOnCamAxis(positionToLookAt);
+
         if(isMovementPressed)
         {
+            //if(currentMovement.z != 0.0f)
+            //{
+            //    Vector3 rotateDir = new Vector3(transform.position.x - cameraDirection.position.x, 0f, transform.position.z - cameraDirection.position.z);
+            //    Quaternion toLookRotation = currentMovement.z > 0? Quaternion.LookRotation(rotateDir) : Quaternion.LookRotation(-rotateDir);
+            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+            //}
+            //else
+            //{
+            //    Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
+            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+            //}
+
             Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
             transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-        }
 
+
+        }
 
     }
     void SetUpJumpVar()
@@ -253,6 +272,22 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    Vector3 newDirOnCamAxis(Vector3 originalVector)
+    {
+
+        Vector3 newAxis = (transform.position - cameraDirection.position);
+        newAxis.y = 0f;
+
+        newAxis.Normalize();
+
+        // Calculate the rotation from the original axis to the new axis
+        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, newAxis);
+
+        // Transform the vector using the rotation
+        Vector3 transformedVector = rotation * originalVector;
+
+        return transformedVector;
+    }
     
     void Update()
     {   
@@ -262,12 +297,15 @@ public class PlayerController : MonoBehaviour
         handleJump();
 
         if (isRunPressed)
-        {
-            characterController.Move(currentRunMovement * Time.deltaTime);
+        {   
+
+             characterController.Move(newDirOnCamAxis(currentRunMovement) * Time.deltaTime);
+
         }
         else
         {
-            characterController.Move(currentMovement * Time.deltaTime);
+
+             characterController.Move(newDirOnCamAxis(currentMovement) * Time.deltaTime);
 
         }
 

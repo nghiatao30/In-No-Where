@@ -18,7 +18,7 @@ public class CameraController : MonoBehaviour
     [Tooltip("Whether or not to invert the look direction")]
     public bool invert = true;
 
-    CinemachineFreeLook cinemachineFreeLook;
+    
 
 
     
@@ -35,8 +35,7 @@ public class CameraController : MonoBehaviour
     /// </summary>
     void Start()
     {   
-        SetUpCamera();
-        cinemachineFreeLook = GetComponent<CinemachineFreeLook>();
+
     }
 
     // Wait this many frames before starting to process the camera rotation
