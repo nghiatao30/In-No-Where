@@ -9,6 +9,8 @@ public class Gun : MonoBehaviour
     [Header("References")]
     [SerializeField] private GunData gunData;
     [SerializeField] private Transform player;
+    [SerializeField] public GameObject projectilePrefab;
+    [SerializeField] public Transform gunBarrel;
 
     float timeSinceLastShot;
 
@@ -45,11 +47,11 @@ public class Gun : MonoBehaviour
         {
             if (CanShoot())
             {
-                if (Physics.Raycast(player.position, player.forward, out RaycastHit hitInfo, gunData.maxDistance))
-                {
-                    IHeathSystem healthObject = hitInfo.transform.GetComponent<IHeathSystem>();
-                    healthObject?.TakeDamage(gunData.damage);
-                }
+                //if (Physics.Raycast(player.position, player.forward, out RaycastHit hitInfo, gunData.maxDistance))
+                //{
+                //    IHeathSystem healthObject = hitInfo.transform.GetComponent<IHeathSystem>();
+                //    healthObject?.TakeDamage(gunData.damage);
+                //}
 
                 gunData.currentAmmo--;
                 timeSinceLastShot = 0;
@@ -65,5 +67,19 @@ public class Gun : MonoBehaviour
         Debug.DrawRay(player.position, player.forward * gunData.maxDistance);
     }
 
-    private void OnGunShot() { }
+    private void OnGunShot() { 
+
+        GameObject bullet = Instantiate(projectilePrefab, gunBarrel.position, gunBarrel.rotation);
+
+        if (bullet != null)
+        {
+            // Call its Fire() function
+            //projectile pro = bullet.GetComponent<projectile>();
+            //pro.Fire();
+        }
+        else
+        {
+            Debug.LogError("Projectile prefab does not have ProjectileBullet component!");
+        }
+    }
 }

@@ -9,6 +9,9 @@ public class PlayerShoot : MonoBehaviour
     PlayerInput playerInput;
     public static Action shootInput;
     public static Action reloadInput;
+    bool isShoot = false;
+    bool isReload = false;
+
 
     [SerializeField] private KeyCode reloadKey = KeyCode.R;
 
@@ -24,19 +27,19 @@ public class PlayerShoot : MonoBehaviour
 
     void OnShoot(InputAction.CallbackContext context)
     {
-        if(context.ReadValueAsButton())
-            {
-            shootInput.Invoke();
-        }
-        
+        isShoot = context.ReadValueAsButton();
     }
 
     void OnReload(InputAction.CallbackContext context)
     {
-        if (context.ReadValueAsButton())
-        {
-            reloadInput.Invoke();
-        }
+        isReload = context.ReadValueAsButton();
+    }
+
+    private void Update()
+    {
+        if(isShoot) shootInput.Invoke();
+        if(isReload) reloadInput.Invoke();  
+
     }
     void OnEnable()
     {
