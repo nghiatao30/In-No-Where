@@ -1,50 +1,34 @@
 using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class RotateCamera : MonoBehaviour
 {
     // Start is called before the first frame update
-    [SerializeField] private float mouseX;
-    [SerializeField] private float mouseY;
-    public Transform lookAtTarget;
-    CinemachineFreeLook cinemachineFreeLook;
-    private float maxHeightLookAt = 1.4f;
-    private float minHeightLookAt = 0f;
-    private float rotateYSpeed = 4f;
-    void Start()
-    {
-        cinemachineFreeLook = GetComponent<CinemachineFreeLook>();
-    }
+    public float horizontalSpeed = 2.0f; // Horizontal rotation speed
+    public float verticalSpeed = 2.0f;   // Vertical rotation speed
 
-    // Update is called once per frame
+    private float yaw = 0.0f;    // Current yaw rotation
+    private float pitch = 0.0f;  // Current pitch rotation
+
     void Update()
     {
+        // Get mouse input
+        float mouseX = Mouse.current.delta.x.ReadValue();
+        float mouseY = Mouse.current.delta.y.ReadValue();
 
+        // Calculate yaw (horizontal) rotation
+        yaw += horizontalSpeed * mouseX;
 
-        //lookYProcess();
-        lookXProcess();
+        // Calculate pitch (vertical) rotation
+        pitch -= verticalSpeed * mouseY;
+        pitch = Mathf.Clamp(pitch, -90f, 90f); // Clamp pitch to avoid flipping
 
+        // Apply rotations to the object
+        transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
     }
-
-    void lookYProcess()
-    {
-        lookAtTarget.position += new Vector3(0f, mouseY * Time.deltaTime, 0f);
-
-        if (lookAtTarget.position.y < minHeightLookAt)
-            lookAtTarget.position = new Vector3(lookAtTarget.position.x, minHeightLookAt, lookAtTarget.position.z);
-        else if (lookAtTarget.position.y > maxHeightLookAt)
-            lookAtTarget.position = new Vector3(lookAtTarget.position.x, maxHeightLookAt, lookAtTarget.position.z);
-    }
-
-    void lookXProcess()
-    {
-        mouseX = Mouse.current.delta.x.ReadValue();
-        mouseY = Mouse.current.delta.y.ReadValue();
-
-        cinemachineFreeLook.m_XAxis.Value += mouseX * rotateYSpeed * Time.deltaTime;
-    }
-
 }
+

@@ -22,8 +22,9 @@ public class PlayerController : MonoBehaviour
     bool isMovementPressed;
     bool isRunPressed;
     bool isJumping;
-    
 
+    public Transform cameraCenter;
+    public Vector3 offset;
 
     [Header("Settings")]
 
@@ -97,7 +98,7 @@ public class PlayerController : MonoBehaviour
     {   
         playerInput = new PlayerInput();
         characterController = GetComponent<CharacterController>();
-        cameraDirection =  GameObject.Find("VirtualCamera1").transform;
+        cameraDirection =  GameObject.Find("VirtualCamera1").transform; 
 
 
         anim = GetComponent<Animator>();
@@ -299,14 +300,14 @@ public class PlayerController : MonoBehaviour
         if (isRunPressed)
         {   
 
-             characterController.Move(newDirOnCamAxis(currentRunMovement) * Time.deltaTime);
-
+            characterController.Move(newDirOnCamAxis(currentRunMovement) * Time.deltaTime);
+            cameraCenter.position = transform.position + offset;
         }
         else
         {
 
-             characterController.Move(newDirOnCamAxis(currentMovement) * Time.deltaTime);
-
+            characterController.Move(newDirOnCamAxis(currentMovement) * Time.deltaTime);
+            cameraCenter.position = transform.position + offset;
         }
 
         
