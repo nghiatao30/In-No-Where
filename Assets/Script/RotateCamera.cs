@@ -21,10 +21,10 @@ public class RotateCamera : MonoBehaviour
         float mouseY = Mouse.current.delta.y.ReadValue();
 
         // Calculate yaw (horizontal) rotation
-        yaw += horizontalSpeed * mouseX;
+        yaw += horizontalSpeed * mouseX * Time.deltaTime;
 
         // Calculate pitch (vertical) rotation
-        pitch -= verticalSpeed * mouseY;
+        pitch -= verticalSpeed * mouseY * Time.deltaTime;
         pitch = Mathf.Clamp(pitch, -90f, 90f); // Clamp pitch to avoid flipping
 
         // Apply rotations to the object
