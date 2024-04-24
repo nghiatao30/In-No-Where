@@ -9,9 +9,9 @@ using UnityEngine.TextCore.Text;
 using static UnityEditor.Experimental.GraphView.GraphView;
 using UnityEngine.InputSystem;
 
-public class PlayerController : MonoBehaviour
+public class AimPlayerController : MonoBehaviour
 {
-    public GameObject player;
+    // Start is called before the first frame update
     PlayerInput playerInput;
     CharacterController characterController;
     GameObject virCam;
@@ -44,7 +44,7 @@ public class PlayerController : MonoBehaviour
     [Header("Jump Timing")]
     public float jumpTimeLeniency = 0.1f;
     float timeToStopLeninent;
-    
+
 
     [SerializeField]
     private float horizontalInput;
@@ -96,10 +96,10 @@ public class PlayerController : MonoBehaviour
     //    setUpJumpVariable();
     //}
     void Awake()
-    {   
+    {
         playerInput = new PlayerInput();
-        characterController = player.GetComponent<CharacterController>();
-        cameraDirection =  GameObject.Find("VirtualCamera1").transform; 
+        characterController = GetComponent<CharacterController>();
+        cameraDirection = GameObject.Find("VirtualCamera1").transform;
 
 
         anim = GetComponent<Animator>();
@@ -122,39 +122,6 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    void handleRotation()
-    {
-        Vector3 positionToLookAt;
-
-        positionToLookAt.x = currentMovement.x;
-        positionToLookAt.y = 0.0f;
-        positionToLookAt.z = currentMovement.z;
-
-        Quaternion currentRotation = transform.rotation;
-
-        positionToLookAt = newDirOnCamAxis(positionToLookAt);
-
-        if(isMovementPressed)
-        {
-            //if(currentMovement.z != 0.0f)
-            //{
-            //    Vector3 rotateDir = new Vector3(transform.position.x - cameraDirection.position.x, 0f, transform.position.z - cameraDirection.position.z);
-            //    Quaternion toLookRotation = currentMovement.z > 0? Quaternion.LookRotation(rotateDir) : Quaternion.LookRotation(-rotateDir);
-            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-            //}
-            //else
-            //{
-            //    Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
-            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-            //}
-
-            Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
-            transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-
-
-        }
-
-    }
     void SetUpJumpVar()
     {
         float timeToApex = maxJumpTime / 2;
@@ -176,7 +143,7 @@ public class PlayerController : MonoBehaviour
 
     void handleJump()
     {
-        if(!isJumping && characterController.isGrounded && isJumpPressed)
+        if (!isJumping && characterController.isGrounded && isJumpPressed)
         {
             anim.SetBool("isJumped", true);
             isJumpAnimating = true;
@@ -185,9 +152,10 @@ public class PlayerController : MonoBehaviour
             currentMovement.y = initialJumpVelocity * .5f;
             currentRunMovement.y = initialJumpVelocity * .5f;
 
-        }else if(!isJumpPressed && isJumping && characterController.isGrounded)
+        }
+        else if (!isJumpPressed && isJumping && characterController.isGrounded)
         {
-            isJumping= false;
+            isJumping = false;
         }
     }
 
@@ -201,7 +169,7 @@ public class PlayerController : MonoBehaviour
         isMovementPressed = currentMovementInput.x != 0 || currentMovementInput.y != 0;
     }
 
-    void OnJump ( InputAction.CallbackContext context)
+    void OnJump(InputAction.CallbackContext context)
     {
         isJumpPressed = context.ReadValueAsButton();
     }
@@ -215,14 +183,15 @@ public class PlayerController : MonoBehaviour
         bool isWalking = anim.GetBool(isWalkingHash);
         bool isRunning = anim.GetBool(isRunningHash);
 
-        if(!isMovementPressed)
+        if (!isMovementPressed)
         {
             anim.SetBool(isWalkingHash, false);
             anim.SetBool(isRunningHash, false);
         }
-    
 
-        if(isMovementPressed && !isWalking) {
+
+        if (isMovementPressed && !isWalking)
+        {
             anim.SetBool(isWalkingHash, true);
         }
 
@@ -242,12 +211,44 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    void handleRotation()
+    {
+        Vector3 positionToLookAt;
+
+        positionToLookAt.x = currentMovement.x;
+        positionToLookAt.y = 0.0f;
+        positionToLookAt.z = currentMovement.z;
+
+        Quaternion currentRotation = transform.rotation;
+
+        if (isMovementPressed)
+        {
+            //if(currentMovement.z != 0.0f)
+            //{
+            //    Vector3 rotateDir = new Vector3(transform.position.x - cameraDirection.position.x, 0f, transform.position.z - cameraDirection.position.z);
+            //    Quaternion toLookRotation = currentMovement.z > 0? Quaternion.LookRotation(rotateDir) : Quaternion.LookRotation(-rotateDir);
+            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+            //}
+            //else
+            //{
+            //    Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
+            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+            //}
+
+            Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
+            transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+
+
+        }
+
+    }
+
     void handleGravity()
     {
         bool isFalling = currentMovement.y <= 0.0f;
-        if(characterController.isGrounded)
+        if (characterController.isGrounded)
         {
-            if(isJumpAnimating)
+            if (isJumpAnimating)
             {
                 anim.SetBool("isJumped", false);
                 isJumpAnimating = false;
@@ -274,41 +275,26 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    Vector3 newDirOnCamAxis(Vector3 originalVector)
-    {
 
-        Vector3 newAxis = (transform.position - cameraDirection.position);
-        newAxis.y = 0f;
-
-        newAxis.Normalize();
-
-        // Calculate the rotation from the original axis to the new axis
-        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, newAxis);
-
-        // Transform the vector using the rotation
-        Vector3 transformedVector = rotation * originalVector;
-
-        return transformedVector;
-    }
-    
     void Update()
-    {   
+    {
         handleAnimation();
-        handleRotation();
+        //handleRotation();
         handleGravity();
         handleJump();
 
         if (isRunPressed)
-        {   
+        {
 
-            characterController.Move(newDirOnCamAxis(currentRunMovement) * Time.deltaTime);
+            characterController.Move(currentRunMovement * Time.deltaTime);
         }
         else
         {
-            characterController.Move(newDirOnCamAxis(currentMovement) * Time.deltaTime);
+
+            characterController.Move(currentMovement * Time.deltaTime);
         }
 
-        
+
 
     }
 
@@ -321,6 +307,4 @@ public class PlayerController : MonoBehaviour
     {
         playerInput.CharacterControls.Disable();
     }
-
-
 }
