@@ -122,6 +122,23 @@ public class AimPlayerController : MonoBehaviour
 
     }
 
+    Vector3 newDirOnCamAxis(Vector3 originalVector)
+    {
+
+        Vector3 newAxis = (transform.position - cameraDirection.position);
+        newAxis.y = 0f;
+
+        newAxis.Normalize();
+
+        // Calculate the rotation from the original axis to the new axis
+        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, newAxis);
+
+        // Transform the vector using the rotation
+        Vector3 transformedVector = rotation * originalVector;
+
+        return transformedVector;
+    }
+
     void SetUpJumpVar()
     {
         float timeToApex = maxJumpTime / 2;
@@ -213,6 +230,7 @@ public class AimPlayerController : MonoBehaviour
 
     void handleRotation()
     {
+        Vector3 camForward = (transform.position - cameraDirection.position).normalized;
         Vector3 positionToLookAt;
 
         positionToLookAt.x = currentMovement.x;
@@ -221,23 +239,13 @@ public class AimPlayerController : MonoBehaviour
 
         Quaternion currentRotation = transform.rotation;
 
-        if (isMovementPressed)
+        positionToLookAt = newDirOnCamAxis(positionToLookAt);
+
+        if (isMovementPressed && positionToLookAt.normalized == camForward)
         {
-            //if(currentMovement.z != 0.0f)
-            //{
-            //    Vector3 rotateDir = new Vector3(transform.position.x - cameraDirection.position.x, 0f, transform.position.z - cameraDirection.position.z);
-            //    Quaternion toLookRotation = currentMovement.z > 0? Quaternion.LookRotation(rotateDir) : Quaternion.LookRotation(-rotateDir);
-            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-            //}
-            //else
-            //{
-            //    Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
-            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-            //}
 
             Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
             transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-
 
         }
 
@@ -279,7 +287,7 @@ public class AimPlayerController : MonoBehaviour
     void Update()
     {
         handleAnimation();
-        //handleRotation();
+        handleRotation();
         handleGravity();
         handleJump();
 

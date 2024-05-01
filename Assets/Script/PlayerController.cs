@@ -290,7 +290,7 @@ public class PlayerController : MonoBehaviour
 
         return transformedVector;
     }
-    
+
     void Update()
     {   
         handleAnimation();
@@ -300,7 +300,6 @@ public class PlayerController : MonoBehaviour
 
         if (isRunPressed)
         {   
-
             characterController.Move(newDirOnCamAxis(currentRunMovement) * Time.deltaTime);
         }
         else
