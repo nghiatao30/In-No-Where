@@ -11,10 +11,10 @@ using UnityEngine.InputSystem;
 
 public class AimPlayerController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public GameObject player;
     PlayerInput playerInput;
     CharacterController characterController;
-    GameObject virCam;
+    [SerializeField] GameObject virCam;
     [SerializeField] private Transform cameraDirection;
 
     Vector2 currentMovementInput;
@@ -98,7 +98,7 @@ public class AimPlayerController : MonoBehaviour
     void Awake()
     {
         playerInput = new PlayerInput();
-        characterController = GetComponent<CharacterController>();
+        characterController = player.GetComponent<CharacterController>();
         cameraDirection = GameObject.Find("VirtualCamera1").transform;
 
 
@@ -120,25 +120,48 @@ public class AimPlayerController : MonoBehaviour
 
         SetUpJumpVar();
 
+        Vector3 camForward = (transform.position - virCam.transform.position);
+        Quaternion currentRotation = transform.rotation;
+        Quaternion toLookRotation = Quaternion.LookRotation(camForward);
+        transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+
     }
 
-    Vector3 newDirOnCamAxis(Vector3 originalVector)
+    void handleRotation()
     {
+        Vector3 camForward = (transform.position - virCam.transform.position);
+        camForward.y = 0.0f;
+        Vector3 positionToLookAt;
 
-        Vector3 newAxis = (transform.position - cameraDirection.position);
-        newAxis.y = 0f;
+        positionToLookAt.x = currentMovement.x;
+        positionToLookAt.y = 0.0f;
+        positionToLookAt.z = currentMovement.z;
 
-        newAxis.Normalize();
+        Quaternion currentRotation = transform.rotation;
 
-        // Calculate the rotation from the original axis to the new axis
-        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, newAxis);
+        positionToLookAt = newDirOnCamAxis(positionToLookAt);
 
-        // Transform the vector using the rotation
-        Vector3 transformedVector = rotation * originalVector;
+        if (isMovementPressed && positionToLookAt.normalized == camForward.normalized)
+        {
+            //if(currentMovement.z != 0.0f)
+            //{
+            //    Vector3 rotateDir = new Vector3(transform.position.x - cameraDirection.position.x, 0f, transform.position.z - cameraDirection.position.z);
+            //    Quaternion toLookRotation = currentMovement.z > 0? Quaternion.LookRotation(rotateDir) : Quaternion.LookRotation(-rotateDir);
+            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+            //}
+            //else
+            //{
+            //    Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
+            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+            //}
 
-        return transformedVector;
+            Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
+            transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+
+
+        }
+
     }
-
     void SetUpJumpVar()
     {
         float timeToApex = maxJumpTime / 2;
@@ -228,29 +251,6 @@ public class AimPlayerController : MonoBehaviour
         }
     }
 
-    void handleRotation()
-    {
-        Vector3 camForward = (transform.position - cameraDirection.position).normalized;
-        Vector3 positionToLookAt;
-
-        positionToLookAt.x = currentMovement.x;
-        positionToLookAt.y = 0.0f;
-        positionToLookAt.z = currentMovement.z;
-
-        Quaternion currentRotation = transform.rotation;
-
-        positionToLookAt = newDirOnCamAxis(positionToLookAt);
-
-        if (isMovementPressed && positionToLookAt.normalized == camForward)
-        {
-
-            Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
-            transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-
-        }
-
-    }
-
     void handleGravity()
     {
         bool isFalling = currentMovement.y <= 0.0f;
@@ -283,6 +283,22 @@ public class AimPlayerController : MonoBehaviour
         }
     }
 
+    Vector3 newDirOnCamAxis(Vector3 originalVector)
+    {
+
+        Vector3 newAxis = (transform.position - cameraDirection.position);
+        newAxis.y = 0f;
+
+        newAxis.Normalize();
+
+        // Calculate the rotation from the original axis to the new axis
+        Quaternion rotation = Quaternion.FromToRotation(Vector3.forward, newAxis);
+
+        // Transform the vector using the rotation
+        Vector3 transformedVector = rotation * originalVector;
+
+        return transformedVector;
+    }
 
     void Update()
     {
@@ -293,13 +309,11 @@ public class AimPlayerController : MonoBehaviour
 
         if (isRunPressed)
         {
-
-            characterController.Move(currentRunMovement * Time.deltaTime);
+            characterController.Move(newDirOnCamAxis(currentRunMovement) * Time.deltaTime);
         }
         else
         {
-
-            characterController.Move(currentMovement * Time.deltaTime);
+            characterController.Move(newDirOnCamAxis(currentMovement) * Time.deltaTime);
         }
 
 
@@ -315,4 +329,6 @@ public class AimPlayerController : MonoBehaviour
     {
         playerInput.CharacterControls.Disable();
     }
+
+
 }

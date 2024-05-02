@@ -11,8 +11,8 @@ public class IsAimingState : MonoBehaviour
     private PlayerController playerController;
     [SerializeField] GameObject aimingCamera;
     PlayerInput playerInput;
-    bool isAiming;
-    void Start()
+    bool isAiming = false;
+    void Awake()
     {
         aimPlayerController = GetComponent<AimPlayerController>();
         playerController = GetComponent<PlayerController>();
@@ -41,5 +41,14 @@ public class IsAimingState : MonoBehaviour
             playerController.enabled = true;
             aimingCamera.SetActive(false);
         }
+    }
+    void OnEnable()
+    {
+        playerInput.CharacterControls.Enable();
+    }
+
+    void OnDisable()
+    {
+        playerInput.CharacterControls.Disable();
     }
 }
