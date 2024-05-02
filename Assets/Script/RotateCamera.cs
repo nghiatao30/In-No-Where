@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
+using static UnityEngine.Rendering.DebugUI;
 
 public class RotateCamera : MonoBehaviour
 {
@@ -13,6 +15,7 @@ public class RotateCamera : MonoBehaviour
 
     public Transform targetObject;
     public float degreesRate = 5f;
+   
 
     private float yaw = 0.0f;    // Current yaw rotation
     private float pitch = 0.0f;  // Current pitch rotation
@@ -38,10 +41,11 @@ public class RotateCamera : MonoBehaviour
 
         // Calculate pitch (vertical) rotation
         pitch -= verticalSpeed * mouseY * Time.deltaTime;
-        pitch = Mathf.Clamp(pitch, -45f, 45f); // Clamp pitch to avoid flipping
+        pitch = Mathf.Clamp(pitch, -25f, 45f); // Clamp pitch to avoid flipping
 
         // Apply rotations to the object
         transform.eulerAngles = new Vector3(pitch, yaw, 0.0f);
+
     }
 
 

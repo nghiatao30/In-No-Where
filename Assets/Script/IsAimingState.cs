@@ -2,6 +2,7 @@ using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
 
 public class IsAimingState : MonoBehaviour
@@ -10,8 +11,10 @@ public class IsAimingState : MonoBehaviour
     private AimPlayerController aimPlayerController;
     private PlayerController playerController;
     [SerializeField] GameObject aimingCamera;
+    [SerializeField] Rig aimingRig;
     PlayerInput playerInput;
     bool isAiming = false;
+    float rigWeight;
     void Awake()
     {
         aimPlayerController = GetComponent<AimPlayerController>();
@@ -29,18 +32,22 @@ public class IsAimingState : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(isAiming)
+        if(isAiming)    
         {
             aimPlayerController.enabled = true;
             playerController.enabled = false;
             aimingCamera.SetActive(true);
+            rigWeight = 1f;
         }
         else
         {
             aimPlayerController.enabled = false;
             playerController.enabled = true;
             aimingCamera.SetActive(false);
+            rigWeight = 0f;
         }
+
+        aimingRig.weight = Mathf.Lerp(aimingRig.weight, rigWeight, Time.deltaTime * 20f);
     }
     void OnEnable()
     {
