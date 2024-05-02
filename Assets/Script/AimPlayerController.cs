@@ -131,36 +131,23 @@ public class AimPlayerController : MonoBehaviour
     {
         Vector3 camForward = (transform.position - virCam.transform.position);
         camForward.y = 0.0f;
-        Vector3 positionToLookAt;
 
-        positionToLookAt.x = currentMovement.x;
-        positionToLookAt.y = 0.0f;
-        positionToLookAt.z = currentMovement.z;
 
         Quaternion currentRotation = transform.rotation;
 
-        positionToLookAt = newDirOnCamAxis(positionToLookAt);
+        //positionToLookAt = newDirOnCamAxis(positionToLookAt);
+        //Vector3 positionToLookAt;
+        //positionToLookAt.x = currentMovement.x;
+        //positionToLookAt.y = 0.0f;
+        //positionToLookAt.z = currentMovement.z;
 
-        if (isMovementPressed && positionToLookAt.normalized == camForward.normalized)
-        {
-            //if(currentMovement.z != 0.0f)
-            //{
-            //    Vector3 rotateDir = new Vector3(transform.position.x - cameraDirection.position.x, 0f, transform.position.z - cameraDirection.position.z);
-            //    Quaternion toLookRotation = currentMovement.z > 0? Quaternion.LookRotation(rotateDir) : Quaternion.LookRotation(-rotateDir);
-            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-            //}
-            //else
-            //{
-            //    Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
-            //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-            //}
-
-            Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
-            transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
-
-
-        }
-
+        //if (isMovementPressed && positionToLookAt.normalized == camForward.normalized)
+        //{
+        //    Quaternion toLookRotation = Quaternion.LookRotation(positionToLookAt);
+        //    transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
+        //}
+        Quaternion toLookRotation = Quaternion.LookRotation(camForward);
+        transform.rotation = Quaternion.Slerp(currentRotation, toLookRotation, rotationPerFrame * Time.deltaTime);
     }
     void SetUpJumpVar()
     {
