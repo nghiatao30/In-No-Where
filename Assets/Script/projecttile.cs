@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class projectile : MonoBehaviour
 {
-    public float force;
+    [SerializeField] float bulletSpeed;
     private Rigidbody rb;
-    Cinemachine.CinemachineImpulseSource source;
+    //Cinemachine.CinemachineImpulseSource source;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -15,10 +15,10 @@ public class projectile : MonoBehaviour
 
     public void Fire()
     {
-        rb.AddForce(transform.forward * (50 * Random.Range(1.3f, 1.7f)) * Time.deltaTime, ForceMode.Impulse);
-        source = GetComponent<Cinemachine.CinemachineImpulseSource>();
+        rb.AddForce(transform.forward * bulletSpeed * Time.deltaTime, ForceMode.Impulse);
+        //source = GetComponent<Cinemachine.CinemachineImpulseSource>();
 
-        source.GenerateImpulse(Camera.main.transform.forward);
+        //source.GenerateImpulse(Camera.main.transform.forward);
     }
 
     public void OnCollisionEnter(Collision collision)

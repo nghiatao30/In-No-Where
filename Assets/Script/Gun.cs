@@ -74,8 +74,8 @@ public class Gun : MonoBehaviour
         if (bullet != null)
         {
             // Call its Fire() function
-            //projectile pro = bullet.GetComponent<projectile>();
-            //pro.Fire();
+            projectile pro = bullet.GetComponent<projectile>();
+            pro.Fire();
         }
         else
         {
