@@ -13,6 +13,10 @@ public class projectile : MonoBehaviour
         rb.centerOfMass = transform.position;
     }
 
+    private void Start()
+    {
+        Fire();
+    }
     public void Fire()
     {
         rb.AddForce(transform.forward * bulletSpeed * Time.deltaTime, ForceMode.Impulse);

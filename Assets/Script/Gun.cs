@@ -12,10 +12,13 @@ public class Gun : MonoBehaviour
     [SerializeField] public GameObject projectilePrefab;
     [SerializeField] public Transform gunBarrel;
 
+    ObjectPooling objectPooler;
+
     float timeSinceLastShot;
 
     private void Start()
     {
+        objectPooler = ObjectPooling.instance;
         PlayerShoot.shootInput += Shoot;
         PlayerShoot.reloadInput += StartReload;
     }
@@ -69,17 +72,19 @@ public class Gun : MonoBehaviour
 
     private void OnGunShot() { 
 
-        GameObject bullet = Instantiate(projectilePrefab, gunBarrel.position, gunBarrel.rotation);
+        objectPooler.spawnFromPool("Bullet", gunBarrel.position, gunBarrel.rotation);
 
-        if (bullet != null)
-        {
-            // Call its Fire() function
-            projectile pro = bullet.GetComponent<projectile>();
-            pro.Fire();
-        }
-        else
-        {
-            Debug.LogError("Projectile prefab does not have ProjectileBullet component!");
-        }
+        //GameObject bullet = Instantiate(projectilePrefab, gunBarrel.position, gunBarrel.rotation);
+
+        //if (bullet != null)
+        //{
+        //    // Call its Fire() function
+        //    projectile pro = bullet.GetComponent<projectile>();
+        //    pro.Fire();
+        //}
+        //else
+        //{
+        //    Debug.LogError("Projectile prefab does not have ProjectileBullet component!");
+        //}
     }
 }
