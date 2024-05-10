@@ -5,6 +5,7 @@ using UnityEngine;
 public class projectile : MonoBehaviour
 {
     [SerializeField] float bulletSpeed;
+    float bulletDamage = 20f;
     private Rigidbody rb;
     //Cinemachine.CinemachineImpulseSource source;
     private void Awake()
@@ -25,20 +26,22 @@ public class projectile : MonoBehaviour
         //source.GenerateImpulse(Camera.main.transform.forward);
     }
 
-    public void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider collider)
     {
-        if (collision.gameObject.name != "Player")
+        IHeathSystem colliderThing = collider.GetComponent<IHeathSystem>();
+
+        if (colliderThing != null)
         {
-            rb.isKinematic = true;
-            StartCoroutine(Countdown());
+            colliderThing.takeDamage(bulletDamage);
+            Destroy(gameObject);
         }
     }
 
-    IEnumerator Countdown()
-    {
-        yield return new WaitForSeconds(10);
-        Destroy(gameObject);
-    }
+    //IEnumerator Countdown()
+    //{
+    //    yield return new WaitForSeconds(10);
+    //    Destroy(gameObject);
+    //}
 
 
 }

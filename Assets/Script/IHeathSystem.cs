@@ -4,6 +4,6 @@ using UnityEngine;
 
 public interface IHeathSystem 
 {
-    public void TakeDamage(float damage);
+    public void takeDamage(float damage);
 
 }
