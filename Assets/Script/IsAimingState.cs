@@ -12,9 +12,11 @@ public class IsAimingState : MonoBehaviour
     private PlayerController playerController;
     [SerializeField] GameObject aimingCamera;
     [SerializeField] Rig aimingRig;
+    [SerializeField] Rig idleRig;
     PlayerInput playerInput;
     bool isAiming = false;
     float rigWeight;
+    float idleWeight;
     void Awake()
     {
         aimPlayerController = GetComponent<AimPlayerController>();
@@ -38,6 +40,7 @@ public class IsAimingState : MonoBehaviour
             playerController.enabled = false;
             aimingCamera.SetActive(true);
             rigWeight = 1f;
+            idleWeight = 0f;
         }
         else
         {
@@ -45,9 +48,11 @@ public class IsAimingState : MonoBehaviour
             playerController.enabled = true;
             aimingCamera.SetActive(false);
             rigWeight = 0f;
+            idleWeight = 1f;
         }
 
         aimingRig.weight = Mathf.Lerp(aimingRig.weight, rigWeight, Time.deltaTime * 20f);
+        idleRig.weight = Mathf.Lerp(idleRig.weight, idleWeight, Time.deltaTime * 20f);
     }
     void OnEnable()
     {
