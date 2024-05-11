@@ -71,6 +71,8 @@ public class AimPlayerController : MonoBehaviour
     int isJumpingHash;
     bool isJumpAnimating;
     int jumpCount = 0;
+    float dirX;
+    float dirY;
     Dictionary<int, float> initialJumpVelocities = new Dictionary<int, float>();
     Dictionary<int, float> jumpGravities = new Dictionary<int, float>();
 
@@ -108,7 +110,6 @@ public class AimPlayerController : MonoBehaviour
         isWalkingHash = Animator.StringToHash("isWalking");
         isRunningHash = Animator.StringToHash("isRunning");
         isJumpingHash = Animator.StringToHash("isJumped");
-
 
         playerInput.CharacterControls.Move.started += OnMoveMentInput;
         playerInput.CharacterControls.Move.canceled += OnMoveMentInput;
@@ -189,6 +190,8 @@ public class AimPlayerController : MonoBehaviour
     void OnMoveMentInput(InputAction.CallbackContext context)
     {
         currentMovementInput = context.ReadValue<Vector2>();
+        dirX = Math.Clamp(currentMovementInput.x,-1,1);
+        dirY = Math.Clamp(currentMovementInput.y,-1,1);
         currentMovement.x = currentMovementInput.x * moveSpeed;
         currentMovement.z = currentMovementInput.y * moveSpeed;
         currentRunMovement.x = currentMovementInput.x * runSpeed;
@@ -209,6 +212,8 @@ public class AimPlayerController : MonoBehaviour
     {
         bool isWalking = anim.GetBool(isWalkingHash);
         bool isRunning = anim.GetBool(isRunningHash);
+        anim.SetFloat("dirX", dirX);
+        anim.SetFloat("dirY", dirY);
 
         if (!isMovementPressed)
         {

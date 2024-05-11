@@ -1,6 +1,7 @@
 using Cinemachine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Animations;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 using UnityEngine.InputSystem;
@@ -17,8 +18,15 @@ public class IsAimingState : MonoBehaviour
     bool isAiming = false;
     float rigWeight;
     float idleWeight;
+    float aimingLayerWeight;
+    //Animator anim;
+
+    Animator aimingAnimationLayer;
+
     void Awake()
-    {
+    {   
+        //anim = GetComponent<Animator>();
+        aimingAnimationLayer = GetComponent<Animator>();
         aimPlayerController = GetComponent<AimPlayerController>();
         playerController = GetComponent<PlayerController>();
         playerInput = new PlayerInput();
@@ -41,6 +49,7 @@ public class IsAimingState : MonoBehaviour
             aimingCamera.SetActive(true);
             rigWeight = 1f;
             idleWeight = 0f;
+            aimingLayerWeight = 1f;
         }
         else
         {
@@ -49,10 +58,12 @@ public class IsAimingState : MonoBehaviour
             aimingCamera.SetActive(false);
             rigWeight = 0f;
             idleWeight = 1f;
+            aimingLayerWeight = 0f;
         }
 
         aimingRig.weight = Mathf.Lerp(aimingRig.weight, rigWeight, Time.deltaTime * 20f);
         idleRig.weight = Mathf.Lerp(idleRig.weight, idleWeight, Time.deltaTime * 20f);
+        aimingAnimationLayer.SetLayerWeight(2, Mathf.Lerp(aimingAnimationLayer.GetLayerWeight(2), aimingLayerWeight, Time.deltaTime * 20f));
     }
     void OnEnable()
     {
