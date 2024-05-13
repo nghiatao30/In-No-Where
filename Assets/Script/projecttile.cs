@@ -2,25 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class projectile : MonoBehaviour
+public class projectile : MonoBehaviour,IPooledObject
 {
     [SerializeField] float bulletSpeed;
     float bulletDamage = 20f;
     private Rigidbody rb;
     //Cinemachine.CinemachineImpulseSource source;
-    private void Awake()
+
+    public void Action()
     {
         rb = GetComponent<Rigidbody>();
         rb.centerOfMass = transform.position;
-    }
-
-    private void Start()
-    {
-        Fire();
-    }
-    public void Fire()
-    {
-        rb.AddForce(transform.forward * bulletSpeed * Time.deltaTime, ForceMode.Impulse);
+        Vector3 tarDir = (GameObject.Find("w").transform.position - transform.position).normalized;
+        rb.AddForce(tarDir * bulletSpeed * Time.deltaTime, ForceMode.Impulse);
+        StartCoroutine(Countdown());
         //source = GetComponent<Cinemachine.CinemachineImpulseSource>();
 
         //source.GenerateImpulse(Camera.main.transform.forward);
@@ -33,15 +28,19 @@ public class projectile : MonoBehaviour
         if (colliderThing != null)
         {
             colliderThing.takeDamage(bulletDamage);
-            Destroy(gameObject);
+
         }
+        gameObject.SetActive(false);
+        
     }
 
-    //IEnumerator Countdown()
-    //{
-    //    yield return new WaitForSeconds(10);
-    //    Destroy(gameObject);
-    //}
+    
+
+    IEnumerator Countdown()
+    {
+        yield return new WaitForSeconds(3);
+        gameObject.SetActive(false);
+    }
 
 
 }
