@@ -9,7 +9,10 @@ public class PlayerHealth : MonoBehaviour, IHeathSystem
     [SerializeField] float maxHealth;
     float currentHealth;
 
-    Animator playerAnim;
+    public float CurrentHealth
+    {
+        get { return currentHealth; }
+    }
     void Die()
     {
         Debug.Log("Player is dead");
