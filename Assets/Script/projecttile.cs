@@ -7,13 +7,20 @@ public class projectile : MonoBehaviour,IPooledObject
     [SerializeField] float bulletSpeed;
     float bulletDamage = 20f;
     private Rigidbody rb;
+    Vector3 tarDir;
     //Cinemachine.CinemachineImpulseSource source;
+    
+    void Awake() { rb = GetComponent<Rigidbody>();}
 
-    public void Action()
+    void Update()
     {
-        rb = GetComponent<Rigidbody>();
+        
+    }
+    public void Action()
+    {   
+        rb.velocity = Vector3.zero;
+        tarDir = (GameObject.Find("w").transform.position - transform.position).normalized;
         rb.centerOfMass = transform.position;
-        Vector3 tarDir = (GameObject.Find("w").transform.position - transform.position).normalized;
         rb.AddForce(tarDir * bulletSpeed * Time.deltaTime, ForceMode.Impulse);
         StartCoroutine(Countdown());
         //source = GetComponent<Cinemachine.CinemachineImpulseSource>();
@@ -34,13 +41,9 @@ public class projectile : MonoBehaviour,IPooledObject
         
     }
 
-    
-
     IEnumerator Countdown()
     {
         yield return new WaitForSeconds(3);
         gameObject.SetActive(false);
     }
-
-
 }
